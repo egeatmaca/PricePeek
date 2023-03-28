@@ -32,9 +32,12 @@ class PriceScraper:
         return chrome_options
 
     def create_driver(self):
-        service = ChromeService("chromedriver/chromedriver")
-        # driver = webdriver.Chrome(service=service) # For local
-        driver = webdriver.Chrome(options=self.get_options()) # For docker
+        # For local
+        # service = ChromeService("chromedriver/chromedriver") 
+        # driver = webdriver.Chrome(service=service)
+
+        # For docker
+        driver = webdriver.Chrome(options=self.get_options()) 
 
         return driver
     
