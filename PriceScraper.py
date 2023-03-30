@@ -3,11 +3,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-# from webdriver_manager.chrome import ChromeDriverManager
 from typing import Generator
 from enum import Enum
+from concurrent.futures import ThreadPoolExecutor
 
 class MarketPlace(Enum):
     AMAZON = "https://www.amazon.com/"
@@ -57,29 +56,43 @@ class PriceScraper:
                 yield result.get_attribute("href")
         except Exception as e:
             print(e)
-            
-        driver.quit()
+        finally:
+            driver.quit()
 
-    def get_prices(self, search_query: str) -> Generator:
+    def get_price(self, link: str) -> float:
         driver = self.create_driver()
 
-        search_link_generator = self.get_search_links(search_query)
-        for link in search_link_generator:
-            print('\nlink: ', link)
+        try:
             driver.get(link)
-            try:
-                price_whole = driver.find_element(By.CLASS_NAME, "a-price-whole")
-                price_fraction = driver.find_element(By.CLASS_NAME, "a-price-fraction")
-                price_symbol = driver.find_element(By.CLASS_NAME, "a-price-symbol")
-                value = float(price_whole.text + "." + price_fraction.text)
-                currency = price_symbol.text
-                price = {"value": value, "currency": currency}
-                print('price: ', price)
-                yield price
-            except Exception as e:
-                print(e)
+            price_whole = driver.find_element(
+                By.CLASS_NAME, "a-price-whole")
+            price_fraction = driver.find_element(
+                By.CLASS_NAME, "a-price-fraction")
+            price_symbol = driver.find_element(
+                By.CLASS_NAME, "a-price-symbol")
+            value = float(price_whole.text.replace(',', '') + "." + price_fraction.text)
+            currency = price_symbol.text
+            price = {"value": value, "currency": currency}
+            return price
+        except Exception as e:
+            print(e)
+        finally:
+            driver.quit()
 
-        driver.quit()
+    def get_prices(self, search_query: str) -> Generator:
+        search_link_generator = self.get_search_links(search_query)
+        search_link_generator = list(search_link_generator)[4:10]
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = []
+            for link in search_link_generator:
+                future = executor.submit(self.get_price, link)
+                futures.append(future)
+
+            for future in futures:
+                result = future.result()
+                print('PRICE:', result)
+                yield result
 
 if __name__ == "__main__":
     scraper = PriceScraper(MarketPlace.AMAZON)
