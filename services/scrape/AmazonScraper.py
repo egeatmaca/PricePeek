@@ -55,9 +55,13 @@ class AmazonScraper(PriceScraper):
             
             price_whole_text = price_whole.text.replace(',', '').replace('.', '')
             price_fraction_text = price_fraction.text
-            value = float(price_whole_text + "." + price_fraction_text)
+            price = float(price_whole_text + "." + price_fraction_text)
             currency = price_symbol.text
-            price = {"value": value, "currency": currency}
+            product_info = {"price": price, "currency": currency}
+
+            if self.producer:
+                self.producer.produce(self.search_query, product_info)
+                self.producer.flush()
     
             print(f'Finished getting product info on page {link}')
             logging.info(f'Finished getting product info on page {link}')

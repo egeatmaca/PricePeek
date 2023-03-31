@@ -5,9 +5,16 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import os
 from typing import Generator
+from confluent_kafka import Producer
 
 
 class PriceScraper(ABC):
+    def __init__(self, producer_config: dict = None) -> None:
+        self.producer = None
+        if producer_config:
+            self.producer = Producer(producer_config)
+
+
     def get_options(self):
         options = Options()
         options.add_argument("--headless")
