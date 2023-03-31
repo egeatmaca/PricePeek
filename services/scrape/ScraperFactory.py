@@ -13,5 +13,5 @@ class ScraperFactory:
             Marketplace.AMAZON: AmazonScraper
         }
 
-    def create_scraper(self, marketplace: Marketplace) -> PriceScraper:
-        return self.scrapers[marketplace]()
+    def create_scraper(self, marketplace: Marketplace, producer_config: dict = None) -> PriceScraper:
+        return self.scrapers[marketplace](producer_config)
