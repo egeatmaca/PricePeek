@@ -10,6 +10,12 @@ from typing import Generator
 from enum import Enum
 from concurrent.futures import ThreadPoolExecutor
 from webdriver_manager.chrome import ChromeDriverManager
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='PriceScraper.log')
 
 
 class MarketPlace(Enum):
@@ -67,7 +73,8 @@ class PriceScraper:
             for result in search_results:
                 yield result.get_attribute("href")
         except Exception as e:
-            print(e)
+            print(f'Error getting search links on page {self.url}: {e}')
+            logging.error(f'Error getting search links on page {self.url}: {e}')
         finally:
             driver.quit()
 
@@ -92,7 +99,8 @@ class PriceScraper:
             price = {"value": value, "currency": currency}
             return price
         except Exception as e:
-            print(e)
+            print(f'Error getting price on page {link}: {e}')
+            logging.error(f'Error getting price on page {link}: {e}')
         finally:
             driver.quit()
 
