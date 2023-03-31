@@ -1,48 +1,21 @@
-import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from webdriver_manager.chrome import ChromeDriverManager
-import os
 from typing import Generator
 from concurrent.futures import ThreadPoolExecutor
 import logging
+from scrapers.PriceScraper import PriceScraper
 
-class PriceScraper:
-    def __init__(self, marketplace):
-        self.marketplace = marketplace
-        self.url = marketplace.value
-
-    def get_options(self):
-        options = Options()
-        options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        # options.add_argument(
-        #     "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
-
-        return options
-
-    def create_driver(self):
-        service = None
-        if os.path.exists("/usr/local/bin/chromedriver"):
-            service = ChromeService("/usr/local/bin/chromedriver")
-        else:
-            service = ChromeService(ChromeDriverManager().install())
-
-        driver = uc.Chrome(service=service, options=self.get_options())
-
-        return driver
+class AmazonScraper(PriceScraper):
+    URL = "https://www.amazon.com/"
     
     def get_search_links(self, search_query:str) -> Generator:
         driver = self.create_driver()
         wait = WebDriverWait(driver, 10)
 
         try:
-            driver.get(self.url)
+            driver.get(AmazonScraper.URL)
 
             search_bar = wait.until(
                 ec.presence_of_element_located((By.ID, "twotabsearchtextbox")))
@@ -56,12 +29,15 @@ class PriceScraper:
             for result in search_results:
                 yield result.get_attribute("href")
         except Exception as e:
-            print(f'Error getting search links on page {self.url}: {e}')
-            logging.error(f'Error getting search links on page {self.url}: {e}')
+            print(f'Error getting search links on page {AmazonScraper.URL}: {e}')
+            logging.error(f'Error getting search links on page {AmazonScraper.URL}: {e}')
         finally:
             driver.quit()
 
-    def get_price(self, link: str) -> float:
+        print(f'Finished getting search links on page {AmazonScraper.URL}')
+        logging.info(f'Finished getting search links on page {AmazonScraper.URL}')
+
+    def get_product_info(self, link: str) -> dict:
         driver = self.create_driver()
         wait = WebDriverWait(driver, 10)
 
@@ -84,21 +60,24 @@ class PriceScraper:
             price = {"value": value, "currency": currency}
             return price
         except Exception as e:
-            print(f'Error getting price on page {link}: {e}')
-            logging.error(f'Error getting price on page {link}: {e}')
+            print(f'Error getting product info on page {link}: {e}')
+            logging.error(f'Error getting product info on page {link}: {e}')
         finally:
             driver.quit()
 
-    def get_prices(self, search_query: str) -> Generator:
+        print(f'Finished getting product info on page {link}')
+        logging.info(f'Finished getting product info on page {link}')
+
+    def get_product_infos(self, search_query: str) -> Generator:
         search_link_generator = self.get_search_links(search_query)
         
         with ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
             for link in search_link_generator:
-                future = executor.submit(self.get_price, link)
+                future = executor.submit(self.get_product_info, link)
                 futures.append(future)
 
             for future in futures:
                 result = future.result()
-                print('PRICE:', result)
+                print('PRODUCT INFO:', result)
                 yield result

@@ -1,12 +1,13 @@
-from PriceScraper import PriceScraper
-from Marketplace import Marketplace
-from log_config import config_logs
+from scrapers.ScraperFactory import ScraperFactory
+from scrapers.Marketplace import Marketplace
+from logs.log_config import config_logs
 
 if __name__ == "__main__":
     config_logs()
 
-    scraper = PriceScraper(Marketplace.AMAZON)
-    prices = scraper.get_prices("iphone")
+    scraper_factory = ScraperFactory()
+    scraper = scraper_factory.create_scraper(Marketplace.AMAZON)
+    product_infos = scraper.get_product_infos("iphone")
     
-    for price in prices:
-        print(price)
+    for product_info in product_infos:
+        print(product_info)
