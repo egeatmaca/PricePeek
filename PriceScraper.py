@@ -31,9 +31,9 @@ class PriceScraper:
         options.add_argument(
             "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 
-        chrome_prefs = {}
-        options.experimental_options["prefs"] = chrome_prefs
-        chrome_prefs["profile.default_content_settings"] = {"images": 2}
+        prefs = {}
+        options.experimental_options["prefs"] = prefs
+        prefs["profile.default_content_settings"] = {"images": 2}
 
         return options
 
