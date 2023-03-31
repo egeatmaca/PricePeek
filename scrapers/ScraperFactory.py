@@ -1,6 +1,11 @@
 from scrapers.PriceScraper import PriceScraper
 from scrapers.AmazonScraper import AmazonScraper
-from scrapers.Marketplace import Marketplace
+from enum import Enum
+
+class Marketplace(Enum):
+    AMAZON = "https://www.amazon.com/"
+    EBAY = "https://www.ebay.com/"
+    ETSY = "https://www.etsy.com/"
 
 class ScraperFactory:
     def __init__(self):

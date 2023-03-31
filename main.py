@@ -1,5 +1,4 @@
-from scrapers.ScraperFactory import ScraperFactory
-from scrapers.Marketplace import Marketplace
+from scrapers.ScraperFactory import ScraperFactory, Marketplace
 from logs.log_config import config_logs
 
 if __name__ == "__main__":
