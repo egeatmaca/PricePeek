@@ -3,15 +3,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
+import os
 from typing import Generator
 from enum import Enum
 from concurrent.futures import ThreadPoolExecutor
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 class MarketPlace(Enum):
     AMAZON = "https://www.amazon.com/"
     EBAY = "https://www.ebay.com/"
     BESTBUY = "https://www.bestbuy.com/"
+
 
 class PriceScraper:
     def __init__(self, marketplace):
@@ -19,39 +24,46 @@ class PriceScraper:
         self.url = marketplace.value
 
     def get_options(self):
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument(
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 
         chrome_prefs = {}
-        chrome_options.experimental_options["prefs"] = chrome_prefs
+        options.experimental_options["prefs"] = chrome_prefs
         chrome_prefs["profile.default_content_settings"] = {"images": 2}
 
-        return chrome_options
+        return options
 
     def create_driver(self):
-        # For local
-        # service = ChromeService("chromedriver/chromedriver") 
-        # driver = webdriver.Chrome(service=service)
+        service = None
+        if os.path.exists("/usr/local/bin/chromedriver"):
+            service = ChromeService("/usr/local/bin/chromedriver")
+        else:
+            service = ChromeService(ChromeDriverManager().install())
 
-        # For docker
-        driver = webdriver.Chrome(options=self.get_options()) 
+        driver = webdriver.Chrome(service=service, options=self.get_options())
 
         return driver
     
     def get_search_links(self, search_query:str) -> Generator:
         driver = self.create_driver()
-
-        driver.get(self.url)
-
-        search_bar = driver.find_element(By.ID, "twotabsearchtextbox")
-        search_bar.send_keys(search_query)
-        search_bar.send_keys(Keys.RETURN)
+        wait = WebDriverWait(driver, 10)
 
         try:
-            search_results = driver.find_elements(
-                By.CSS_SELECTOR, "div.s-result-item a.a-link-normal")
+            driver.get(self.url)
+
+            search_bar = wait.until(
+                ec.presence_of_element_located((By.ID, "twotabsearchtextbox")))
+            
+            search_bar.send_keys(search_query)
+            search_bar.send_keys(Keys.RETURN)
+            
+            search_results = wait.until(
+                ec.presence_of_all_elements_located((By.CSS_SELECTOR, "div.s-result-item a.a-link-normal")))
+            
             for result in search_results:
                 yield result.get_attribute("href")
         except Exception as e:
@@ -61,15 +73,20 @@ class PriceScraper:
 
     def get_price(self, link: str) -> float:
         driver = self.create_driver()
+        wait = WebDriverWait(driver, 10)
 
         try:
             driver.get(link)
-            price_whole = driver.find_element(
-                By.CLASS_NAME, "a-price-whole")
-            price_fraction = driver.find_element(
-                By.CLASS_NAME, "a-price-fraction")
-            price_symbol = driver.find_element(
-                By.CLASS_NAME, "a-price-symbol")
+
+            price_whole = wait.until(
+                ec.presence_of_element_located((By.CLASS_NAME, "a-price-whole")))
+            
+            price_fraction = wait.until(
+                ec.presence_of_element_located((By.CLASS_NAME, "a-price-fraction")))
+            
+            price_symbol = wait.until(
+                ec.presence_of_element_located((By.CLASS_NAME, "a-price-symbol")))
+            
             value = float(price_whole.text.replace(',', '') + "." + price_fraction.text)
             currency = price_symbol.text
             price = {"value": value, "currency": currency}
@@ -81,7 +98,6 @@ class PriceScraper:
 
     def get_prices(self, search_query: str) -> Generator:
         search_link_generator = self.get_search_links(search_query)
-        search_link_generator = list(search_link_generator)[4:10]
         
         with ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
