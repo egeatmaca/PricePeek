@@ -5,24 +5,11 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from webdriver_manager.chrome import ChromeDriverManager
 import os
 from typing import Generator
-from enum import Enum
 from concurrent.futures import ThreadPoolExecutor
-from webdriver_manager.chrome import ChromeDriverManager
 import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename='PriceScraper.log')
-
-
-class MarketPlace(Enum):
-    AMAZON = "https://www.amazon.com/"
-    EBAY = "https://www.ebay.com/"
-    BESTBUY = "https://www.bestbuy.com/"
-
 
 class PriceScraper:
     def __init__(self, marketplace):
@@ -117,8 +104,3 @@ class PriceScraper:
                 result = future.result()
                 print('PRICE:', result)
                 yield result
-
-if __name__ == "__main__":
-    scraper = PriceScraper(MarketPlace.AMAZON)
-    search_query = "laptop"
-    print([price for price in scraper.get_prices(search_query)])

@@ -34,4 +34,4 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Run the main.py file
-CMD ["python", "PriceScraper.py"]
+CMD ["python", "main.py"]
