@@ -1,4 +1,4 @@
-from selenium import webdriver
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -21,12 +21,8 @@ class PriceScraper:
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        options.add_argument(
-            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
-
-        prefs = {}
-        options.experimental_options["prefs"] = prefs
-        prefs["profile.default_content_settings"] = {"images": 2}
+        # options.add_argument(
+        #     "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 
         return options
 
@@ -37,7 +33,7 @@ class PriceScraper:
         else:
             service = ChromeService(ChromeDriverManager().install())
 
-        driver = webdriver.Chrome(service=service, options=self.get_options())
+        driver = uc.Chrome(service=service, options=self.get_options())
 
         return driver
     
@@ -81,7 +77,9 @@ class PriceScraper:
             price_symbol = wait.until(
                 ec.presence_of_element_located((By.CLASS_NAME, "a-price-symbol")))
             
-            value = float(price_whole.text.replace(',', '') + "." + price_fraction.text)
+            price_whole_text = price_whole.text.replace(',', '').replace('.', '')
+            price_fraction_text = price_fraction.text
+            value = float(price_whole_text + "." + price_fraction_text)
             currency = price_symbol.text
             price = {"value": value, "currency": currency}
             return price
