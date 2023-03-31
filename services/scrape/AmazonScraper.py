@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from typing import Generator
 from concurrent.futures import ThreadPoolExecutor
 import logging
-from services.scrapers.PriceScraper import PriceScraper
+from services.scrape.PriceScraper import PriceScraper
 
 class AmazonScraper(PriceScraper):
     URL = "https://www.amazon.com/"
@@ -28,14 +28,14 @@ class AmazonScraper(PriceScraper):
             
             for result in search_results:
                 yield result.get_attribute("href")
+
+            print(f'Finished getting search links on page {AmazonScraper.URL}')
+            logging.info(f'Finished getting search links on page {AmazonScraper.URL}')
         except Exception as e:
             print(f'Error getting search links on page {AmazonScraper.URL}: {e}')
             logging.error(f'Error getting search links on page {AmazonScraper.URL}: {e}')
         finally:
             driver.quit()
-
-        print(f'Finished getting search links on page {AmazonScraper.URL}')
-        logging.info(f'Finished getting search links on page {AmazonScraper.URL}')
 
     def get_product_info(self, link: str) -> dict:
         driver = self.create_driver()
@@ -58,6 +58,10 @@ class AmazonScraper(PriceScraper):
             value = float(price_whole_text + "." + price_fraction_text)
             currency = price_symbol.text
             price = {"value": value, "currency": currency}
+    
+            print(f'Finished getting product info on page {link}')
+            logging.info(f'Finished getting product info on page {link}')
+    
             return price
         except Exception as e:
             print(f'Error getting product info on page {link}: {e}')
@@ -65,8 +69,6 @@ class AmazonScraper(PriceScraper):
         finally:
             driver.quit()
 
-        print(f'Finished getting product info on page {link}')
-        logging.info(f'Finished getting product info on page {link}')
 
     def get_product_infos(self, search_query: str) -> Generator:
         search_link_generator = self.get_search_links(search_query)
