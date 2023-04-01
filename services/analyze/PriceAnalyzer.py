@@ -1,10 +1,26 @@
-
+from pyspark.sql import SparkSession
+import os
 
 class PriceAnalyzer:
-    def __init__(self, topic_id):
-        # TODO: Implement
-        pass
+    def analyze(self, topic_name: str) -> None:
+        spark = (
+            SparkSession.builder.appName("PriceAnalyzer")
+            .master("local[*]")
+            .getOrCreate()
+        )
+        spark.sparkContext.setLogLevel("ERROR")
 
-    def analyze(self):
+        df = (
+            spark.readStream.format("kafka")
+            .option("kafka.bootstrap.servers", os.environ.get('KAFKA_BOOTSTRAP_SERVER'))
+            .option("subscribe", topic_name)
+            .option("startingOffsets", "latest")
+            .load()
+        )
+
+        df.printSchema()
+        df.show()
+
+
         # TODO: Implement
         pass
