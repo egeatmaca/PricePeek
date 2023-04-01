@@ -58,15 +58,11 @@ class AmazonScraper(PriceScraper):
             price = float(price_whole_text + "." + price_fraction_text)
             currency = price_symbol.text
             product_info = {"price": price, "currency": currency}
-
-            if self.producer:
-                self.producer.produce(self.search_query, product_info)
-                self.producer.flush()
     
             print(f'Finished getting product info on page {link}')
             logging.info(f'Finished getting product info on page {link}')
     
-            return price
+            return product_info
         except Exception as e:
             print(f'Error getting product info on page {link}: {e}')
             logging.error(f'Error getting product info on page {link}: {e}')

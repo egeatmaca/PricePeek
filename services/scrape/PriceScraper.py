@@ -9,19 +9,13 @@ from confluent_kafka import Producer
 
 
 class PriceScraper(ABC):
-    def __init__(self, producer_config: dict = None) -> None:
-        self.producer = None
-        if producer_config:
-            self.producer = Producer(producer_config)
-
 
     def get_options(self):
         options = Options()
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        # options.add_argument(
-        #     "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
+        # options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 
         return options
 
@@ -47,3 +41,9 @@ class PriceScraper(ABC):
     @abstractmethod
     def get_product_infos(self, search_query: str) -> Generator:
         pass
+
+    def publish_product_infos(self, search_query: str, producer_config: dict) -> None:
+        producer = Producer(producer_config)
+        for product_info in self.get_product_infos(search_query):
+            producer.produce(search_query, product_info)
+            producer.flush()

@@ -2,10 +2,10 @@ from pyspark.sql import SparkSession
 import os
 
 class PriceAnalyzer:
-    def analyze(self, topic_name: str) -> None:
+    def analyze(self, spark_master: str, topic_name: str) -> None:
         spark = (
             SparkSession.builder.appName("PriceAnalyzer")
-            .master("local[*]")
+            .master(spark_master)
             .getOrCreate()
         )
         spark.sparkContext.setLogLevel("ERROR")
