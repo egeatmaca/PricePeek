@@ -22,7 +22,7 @@ RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 ENV DISPLAY=:99
 
 # Set working directory
-WORKDIR /pricepeek
+WORKDIR /data_job_service
 
 # Copy requirements.txt to the working directory
 COPY requirements.txt requirements.txt

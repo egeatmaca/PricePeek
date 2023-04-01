@@ -1,5 +1,5 @@
 import os
-from services.scrape.ScraperFactory import ScraperFactory, Marketplace
+from scrape.ScraperFactory import ScraperFactory, Marketplace
 from logs.log_config import config_logs
 
 def test_scraper():

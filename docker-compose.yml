@@ -1,12 +1,12 @@
 services:
-  pricepeek:
-    container_name: pricepeek
-    image: pricepeek
-    build: .
+  data_job_service:
+    container_name: data_job_service
+    image: data_job_service
+    build: ./data_job_service
     ports:
       - "3000:3000"
     volumes:
-      - .:/pricepeek
+      - ./data_job_service:/data_job_service
     environment:
       - KAFKA_BROKER=PLAINTEXT://localhost:9092
       - SPARK_MASTER=spark://spark-master:7077

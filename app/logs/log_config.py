@@ -6,6 +6,6 @@ def config_logs():
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        filename=os.path.join('logs', 'logs.log'))
+        filename=os.path.join('logs', 'app.log'))
 
 

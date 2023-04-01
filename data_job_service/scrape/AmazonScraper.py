@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from typing import Generator
 from concurrent.futures import ThreadPoolExecutor
 import logging
-from services.scrape.PriceScraper import PriceScraper
+from scrape.PriceScraper import PriceScraper
 
 class AmazonScraper(PriceScraper):
     URL = "https://www.amazon.com/"

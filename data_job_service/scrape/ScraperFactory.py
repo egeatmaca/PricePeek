@@ -1,5 +1,5 @@
-from services.scrape.PriceScraper import PriceScraper
-from services.scrape.AmazonScraper import AmazonScraper
+from scrape.PriceScraper import PriceScraper
+from scrape.AmazonScraper import AmazonScraper
 from enum import Enum
 
 class Marketplace(Enum):
