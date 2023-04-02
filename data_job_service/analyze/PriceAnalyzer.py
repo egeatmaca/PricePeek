@@ -1,8 +1,12 @@
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 import os
 
 class PriceAnalyzer:
-    def analyze(self, spark_master: str, topic_name: str) -> None:
+    def analyze(self, df: DataFrame) -> None:
+        df.printSchema()
+        df.show()
+
+    def consume_product_infos(self, topic_name: str, kafka_broker: str, spark_master) -> None:
         spark = (
             SparkSession.builder.appName("PriceAnalyzer")
             .master(spark_master)
@@ -12,15 +16,11 @@ class PriceAnalyzer:
 
         df = (
             spark.readStream.format("kafka")
-            .option("kafka.bootstrap.servers", os.environ.get('KAFKA_BOOTSTRAP_SERVER'))
+            .option("kafka.bootstrap.servers", kafka_broker)
             .option("subscribe", topic_name)
             .option("startingOffsets", "latest")
             .load()
         )
 
-        df.printSchema()
-        df.show()
-
-
-        # TODO: Implement
-        pass
+        self.analyze(df)
+        

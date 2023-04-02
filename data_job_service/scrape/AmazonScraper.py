@@ -40,7 +40,7 @@ class AmazonScraper(PriceScraper):
     def get_product_info(self, link: str) -> dict:
         driver = self.create_driver()
         wait = WebDriverWait(driver, 10)
-
+                
         try:
             driver.get(link)
 
@@ -59,8 +59,8 @@ class AmazonScraper(PriceScraper):
             currency = price_symbol.text
             product_info = {"price": price, "currency": currency}
     
-            print(f'Finished getting product info on page {link}')
-            logging.info(f'Finished getting product info on page {link}')
+            print(f'Finished getting product info on page {link}. Product info: {product_info}')
+            logging.info(f'Finished getting product info on page {link}. Product info: {product_info}')
     
             return product_info
         except Exception as e:
@@ -72,6 +72,7 @@ class AmazonScraper(PriceScraper):
 
     def get_product_infos(self, search_query: str) -> Generator:
         search_link_generator = self.get_search_links(search_query)
+        search_link_generator = list(search_link_generator)[:10] # TODO: Delete after testing
         
         with ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
@@ -81,5 +82,4 @@ class AmazonScraper(PriceScraper):
 
             for future in futures:
                 result = future.result()
-                print('PRODUCT INFO:', result)
                 yield result

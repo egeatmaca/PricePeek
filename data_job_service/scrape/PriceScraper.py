@@ -4,11 +4,16 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import os
-from typing import Generator
+import json
+from threading import Lock
 from confluent_kafka import Producer
+from confluent_kafka.admin import AdminClient, NewTopic
+from typing import Generator
 
 
 class PriceScraper(ABC):
+    def __init__(self):
+        self.chromedriver_file_lock = Lock()
 
     def get_options(self):
         options = Options()
@@ -20,6 +25,8 @@ class PriceScraper(ABC):
         return options
 
     def create_driver(self):
+        self.chromedriver_file_lock.acquire()
+
         service = None
         if os.path.exists("/usr/local/bin/chromedriver"):
             service = Service("/usr/local/bin/chromedriver")
@@ -27,6 +34,8 @@ class PriceScraper(ABC):
             service = Service(ChromeDriverManager().install())
 
         driver = uc.Chrome(service=service, options=self.get_options())
+
+        self.chromedriver_file_lock.release()
 
         return driver
 
@@ -42,8 +51,15 @@ class PriceScraper(ABC):
     def get_product_infos(self, search_query: str) -> Generator:
         pass
 
-    def publish_product_infos(self, search_query: str, producer_config: dict) -> None:
-        producer = Producer(producer_config)
+    def publish_product_infos(self, search_query: str, kafka_config: dict) -> None:
+        kafka_admin = AdminClient(kafka_config)
+        topics = kafka_admin.list_topics()
+        if search_query not in topics.topics:
+            kafka_admin.create_topics([NewTopic(search_query, 1, 1)])
+
+        producer = Producer(**kafka_config)
         for product_info in self.get_product_infos(search_query):
-            producer.produce(search_query, product_info)
+            product_info_bytes = json.dumps(product_info).encode('utf-8')
+            producer.produce(search_query, product_info_bytes)
             producer.flush()
+            print(f'Published product info: {product_info}')

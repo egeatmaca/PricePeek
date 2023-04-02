@@ -2,13 +2,14 @@ services:
   data_job_service:
     container_name: data_job_service
     image: data_job_service
-    build: ./data_job_service
+    build: 
+      context: ./data_job_service
     ports:
       - "3000:3000"
     volumes:
       - ./data_job_service:/data_job_service
     environment:
-      - KAFKA_BROKER=PLAINTEXT://localhost:9092
+      - KAFKA_BROKER=broker:29092
       - SPARK_MASTER=spark://spark-master:7077
     depends_on:
       - broker
@@ -30,6 +31,7 @@ services:
     # To learn about configuring Kafka for access across networks see
     # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
       - "9092:9092"
+      - "29092:29092"
     depends_on:
       - zookeeper
     environment:
