@@ -25,7 +25,7 @@ class PriceScraper(ABC):
         return options
 
     def create_driver(self):
-        self.chromedriver_file_lock.acquire()
+        self.chromedriver_file_lock.acquire(blocking=True, timeout=30)
 
         service = None
         if os.path.exists("/usr/local/bin/chromedriver"):
