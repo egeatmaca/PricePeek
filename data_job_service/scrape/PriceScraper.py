@@ -13,7 +13,7 @@ from typing import Generator
 
 class PriceScraper(ABC):
     def __init__(self):
-        self.chromedriver_file_lock = Lock()
+        self.driver_file_lock = Lock()
 
     def get_options(self):
         options = Options()
@@ -25,7 +25,7 @@ class PriceScraper(ABC):
         return options
 
     def create_driver(self):
-        self.chromedriver_file_lock.acquire(blocking=True, timeout=30)
+        self.driver_file_lock.acquire(blocking=True)
 
         service = None
         if os.path.exists("/usr/local/bin/chromedriver"):
@@ -35,7 +35,7 @@ class PriceScraper(ABC):
 
         driver = uc.Chrome(service=service, options=self.get_options())
 
-        self.chromedriver_file_lock.release()
+        self.driver_file_lock.release()
 
         return driver
 

@@ -2,8 +2,7 @@ services:
   data_job_service:
     container_name: data_job_service
     image: data_job_service
-    build: 
-      context: ./data_job_service
+    build: ./data_job_service
     ports:
       - "3000:3000"
     volumes:
