@@ -1,0 +1,16 @@
+<html>
+<head>
+    <title>PricePeek</title>
+</head>
+<body>
+    <h1>PricePeek</h1>
+    <form action="/request_analysis" method="post">
+        <select name="marketplace">
+            <option value="amazon">Amazon</option>
+            <option value="ebay">eBay</option>
+            <option value="etsy">Etsy</option>
+        </select>
+        <input type="text" name="search_query" placeholder="Enter a search query for a product">
+        <input type="submit" value="Analyze!">
+    </form>
+</html>

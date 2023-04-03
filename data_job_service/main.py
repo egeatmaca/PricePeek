@@ -8,12 +8,12 @@ app = FastAPI()
 @app.get("/{marketplace}/{search_query}")
 def index(marketplace, search_query):
     try:
-        AnalysisController.scrape_and_analyze(marketplace, search_query)
+        AnalysisController().scrape_and_analyze(marketplace, search_query)
         return {"message": "success"}
     except Exception as e:
         return {"message": f"error: {e}"}
 
 if __name__ == "__main__":
     config_logs()
-    uvicorn.run(app, host="0.0.0.0", port=3000)
+    uvicorn.run(app, host="0.0.0.0", port=3001)
 

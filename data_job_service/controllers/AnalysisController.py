@@ -5,7 +5,7 @@ from services.analyzers.PriceAnalyzer import PriceAnalyzer
 import logging
 
 class AnalysisController:
-    def scrape_and_analyze(marketplace_str: str, search_query: str) -> None:
+    def scrape_and_analyze(self, marketplace_str: str, search_query: str) -> None:
         marketplace = None
         if marketplace_str == "amazon":
             marketplace = Marketplace.AMAZON

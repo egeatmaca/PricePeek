@@ -1,10 +1,23 @@
 services:
+  app:
+    container_name: app
+    image: app
+    build: ./app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./app:/app
+    environment:
+      - DATA_JOB_SERVICE=0.0.0.0:3001
+    depends_on:
+      - data_job_service
+
   data_job_service:
     container_name: data_job_service
     image: data_job_service
     build: ./data_job_service
     ports:
-      - "3000:3000"
+      - "3001:3001"
     volumes:
       - ./data_job_service:/data_job_service
     environment:
