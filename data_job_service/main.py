@@ -8,8 +8,7 @@ app = FastAPI()
 @app.get("/{marketplace}/{search_query}")
 def index(marketplace, search_query):
     try:
-        AnalysisController().scrape_and_analyze(marketplace, search_query)
-        return {"message": "success"}
+        return AnalysisController().scrape_and_analyze(marketplace, search_query)
     except Exception as e:
         return {"message": f"error: {e}"}
 

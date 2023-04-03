@@ -28,7 +28,7 @@ class AnalysisController:
         spark_master = os.environ.get("SPARK_MASTER")
 
         scrape_process = Process(target=scraper.publish_product_infos, args=(search_query, kafka_config))
-        analyze_process = Process(target=analyzer.consume_product_infos, args=(search_query, kafka_broker, spark_master))
+        # analyze_process = Process(target=analyzer.consume_product_infos, args=(search_query, kafka_broker, spark_master))
 
         scrape_process.start()
         # analyze_process.start()
@@ -38,6 +38,8 @@ class AnalysisController:
 
         print(f"Finished scraping and analyzing {search_query} on {marketplace}")
         logging.info(f"Finished scraping and analyzing {search_query} on {marketplace}")
+
+        return {"message": f"Finished scraping and analyzing {search_query} on {marketplace}"}
 
 
 

@@ -1,7 +1,8 @@
 import requests
 import json
 
-class AnalysisService:
+
+class AnalysisController:
     def __init__(self, data_job_service):
         self.data_job_service = data_job_service
 
