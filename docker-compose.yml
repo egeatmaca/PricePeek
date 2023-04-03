@@ -8,7 +8,7 @@ services:
     volumes:
       - ./app:/app
     environment:
-      - DATA_JOB_SERVICE=0.0.0.0:3001
+      - DATA_JOB_SERVICE=data_job_service:3001
     depends_on:
       - data_job_service
 
