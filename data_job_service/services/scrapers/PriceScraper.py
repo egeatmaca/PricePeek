@@ -52,14 +52,16 @@ class PriceScraper(ABC):
         pass
 
     def publish_product_infos(self, search_query: str, kafka_config: dict) -> None:
+        topic_name = search_query.replace(' ', '_')
+
         kafka_admin = AdminClient(kafka_config)
         topics = kafka_admin.list_topics()
-        if search_query not in topics.topics:
-            kafka_admin.create_topics([NewTopic(search_query, 1, 1)])
+        if topic_name not in topics.topics:
+            kafka_admin.create_topics([NewTopic(topic_name, 1, 1)])
 
         producer = Producer(**kafka_config)
-        for product_info in self.get_product_infos(search_query):
+        for product_info in self.get_product_infos(topic_name):
             product_info_bytes = json.dumps(product_info).encode('utf-8')
-            producer.produce(search_query, product_info_bytes)
+            producer.produce(topic_name, product_info_bytes)
             producer.flush()
             print(f'Published product info: {product_info}')
