@@ -9,33 +9,37 @@ from services.scrapers.PriceScraper import PriceScraper
 
 class AmazonScraper(PriceScraper):
     URL = "https://www.amazon.com/"
+    ERROR_LIMIT = 5
     
     def get_search_links(self, search_query:str) -> Generator:
         driver = self.create_driver()
         wait = WebDriverWait(driver, 10)
 
-        try:
-            driver.get(AmazonScraper.URL)
+        error_count = 0
+        while error_count < AmazonScraper.ERROR_LIMIT:
+            try:
+                driver.get(AmazonScraper.URL)
 
-            search_bar = wait.until(
-                ec.presence_of_element_located((By.ID, "twotabsearchtextbox")))
-            
-            search_bar.send_keys(search_query)
-            search_bar.send_keys(Keys.RETURN)
-            
-            search_results = wait.until(
-                ec.presence_of_all_elements_located((By.CSS_SELECTOR, "div.s-result-item a.a-link-normal")))
-            
-            for result in search_results:
-                yield result.get_attribute("href")
+                search_bar = wait.until(
+                    ec.presence_of_element_located((By.ID, "twotabsearchtextbox")))
+                
+                search_bar.send_keys(search_query)
+                search_bar.send_keys(Keys.RETURN)
+                
+                search_results = wait.until(
+                    ec.presence_of_all_elements_located((By.CSS_SELECTOR, "div.s-result-item a.a-link-normal")))
+                
+                for result in search_results:
+                    yield result.get_attribute("href")
 
-            print(f'Finished getting search links on page {AmazonScraper.URL}')
-            logging.info(f'Finished getting search links on page {AmazonScraper.URL}')
-        except Exception as e:
-            print(f'Error getting search links on page {AmazonScraper.URL}: {e}')
-            logging.error(f'Error getting search links on page {AmazonScraper.URL}: {e}')
-        finally:
-            driver.quit()
+                print(f'Finished getting search links on page {AmazonScraper.URL}')
+                logging.info(f'Finished getting search links on page {AmazonScraper.URL}')
+            except Exception as e:
+                print(f'Error getting search links on page {AmazonScraper.URL}: {e}')
+                logging.error(f'Error getting search links on page {AmazonScraper.URL}: {e}')
+                error_count += 1
+            finally:
+                driver.quit()
 
     def get_product_info(self, link: str) -> dict:
         driver = self.create_driver()
@@ -82,4 +86,5 @@ class AmazonScraper(PriceScraper):
 
             for future in futures:
                 result = future.result()
-                yield result
+                if result:
+                    yield result

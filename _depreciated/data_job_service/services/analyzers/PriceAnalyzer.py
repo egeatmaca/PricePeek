@@ -1,10 +1,11 @@
-from pyspark.sql import SparkSession, DataFrame
-import os
+from pyspark.sql import SparkSession, DataFrame, functions as F, types as T
+import json
 
 class PriceAnalyzer:
-    def analyze(self, df: DataFrame) -> None:
-        df.printSchema()
-        df.writeStream.format("console").start().awaitTermination()
+    def analyze(self, df_stream: DataFrame) -> None:
+        df_stream.printSchema()
+        df = df_stream.select(F.cast(T.StringType(), F.col('value')))
+        df.writeStream.format("console").start().awaitTermination(timeout=1200)
         print("Finished analyzing")
 
     def consume_product_infos(self, topic_name: str, kafka_broker: str, spark_master) -> None:

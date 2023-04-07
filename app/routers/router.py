@@ -9,7 +9,7 @@ from controllers.AnalysisController import AnalysisController
 router = APIRouter()
 templates = Jinja2Templates(directory='templates')
 
-analysis_controller = AnalysisController(os.environ.get('DATA_JOB_SERVICE'))
+analysis_controller = AnalysisController(os.environ.get('DATA_PROCESSOR'))
 
 @router.get('/', response_class=HTMLResponse)
 def get_index(request: Request) -> HTMLResponse:

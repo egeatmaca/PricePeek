@@ -6,7 +6,7 @@ from logs.log_config import config_logs
 app = FastAPI()
 
 @app.get("/{marketplace}/{search_query}")
-def index(marketplace, search_query):
+def scrape_and_analyze(marketplace, search_query):
     try:
         return AnalysisController().scrape_and_analyze(marketplace, search_query)
     except Exception as e:
