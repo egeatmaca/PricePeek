@@ -6,6 +6,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import os
 from threading import Lock
 from typing import Generator
+import logging
 
 
 class PriceScraper(ABC):
@@ -23,16 +24,21 @@ class PriceScraper(ABC):
 
     def create_driver(self):
         self.driver_file_lock.acquire(blocking=True)
+        
+        driver = None
+        try:
+            service = None
+            if os.path.exists("/usr/local/bin/chromedriver"):
+                service = Service("/usr/local/bin/chromedriver")
+            else:
+                service = Service(ChromeDriverManager().install())
 
-        service = None
-        if os.path.exists("/usr/local/bin/chromedriver"):
-            service = Service("/usr/local/bin/chromedriver")
-        else:
-            service = Service(ChromeDriverManager().install())
-
-        driver = uc.Chrome(service=service, options=self.get_options())
-
-        self.driver_file_lock.release()
+            driver = uc.Chrome(service=service, options=self.get_options())
+        except Exception as e:
+            print(f"Error creating driver: {e}")
+            logging.error(f"Error creating driver: {e}")
+        finally:
+            self.driver_file_lock.release()
 
         return driver
 

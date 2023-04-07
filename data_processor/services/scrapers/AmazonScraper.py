@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from typing import Generator
 from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Lock
 import logging
 from services.scrapers.PriceScraper import PriceScraper
 
@@ -34,6 +35,9 @@ class AmazonScraper(PriceScraper):
 
                 print(f'Finished getting search links on page {AmazonScraper.URL}')
                 logging.info(f'Finished getting search links on page {AmazonScraper.URL}')
+
+                break
+
             except Exception as e:
                 print(f'Error getting search links on page {AmazonScraper.URL}: {e}')
                 logging.error(f'Error getting search links on page {AmazonScraper.URL}: {e}')
